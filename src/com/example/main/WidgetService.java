@@ -9,9 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.example.model.Forcast;
 import com.example.model.ResBean;
 import com.example.test.R;
 
@@ -59,11 +59,35 @@ public class WidgetService extends Service {
 			RemoteViews remoteViews = new RemoteViews(getApplicationContext()
 					.getPackageName(), R.layout.widget_layout);
 
-			remoteViews.setTextViewText(R.id.update, "Location:- " + iResBin.getName()
-					+ "\n" + "Temp:- " + iResBin.getMain().getTemp() + "\n"
-					+ "Status:- "
-					+ iResBin.getWeather().get(0).getDescription());
+			remoteViews.setTextViewText(R.id.update,
+					"Location:- " + iResBin.getName() + "\n" + "Temp:- "
+							+ iResBin.getMain().getTemp() + "\n" + "Status:- "
+							+ iResBin.getWeather().get(0).getDescription());
 
+			// /
+			String for_response = Utils_Http
+					.Request("http://api.openweathermap.org/data/2.5/forecast?q="
+							+ name
+							+ "&mode=json&appid=bd82977b86bf27fb59a04b61b657fb6f");
+			final Forcast f_res = CoreGsonUtils.fromJson(for_response,
+					Forcast.class);
+			String text = "";
+			if (f_res != null && f_res.getCod() == 200
+					&& f_res.getList().size() > 0) {
+				for (int i = 0; i < 4 && i < f_res.getList().size(); i++) {
+					text += "Weather Forcaste:- "
+							+ (i + 1)
+							+ "\n"
+							+ "Temp:- "
+							+ f_res.getList().get(i).getMain().getTemp()
+							+ "\n"
+							+ "Status:- "
+							+ f_res.getList().get(i).getWeather().get(0)
+									.getDescription() + "\n";
+				}
+
+			}
+			remoteViews.setTextViewText(R.id.forcaste, text);
 			Intent clickIntent = new Intent(getApplicationContext(),
 					WidgetProvider.class);
 
@@ -75,6 +99,7 @@ public class WidgetService extends Service {
 					getApplicationContext(), 0, clickIntent,
 					PendingIntent.FLAG_UPDATE_CURRENT);
 			remoteViews.setOnClickPendingIntent(R.id.update, pendingIntent);
+			remoteViews.setOnClickPendingIntent(R.id.layout, pendingIntent);
 			appWidgetManager.updateAppWidget(allWidgetIds, remoteViews);
 
 		}
