@@ -50,44 +50,46 @@ public class WidgetService extends Service {
 			SharedPreferences prefs = getSharedPreferences(
 					"com.example.shareapp", Context.MODE_PRIVATE);
 			String name = prefs.getString("location", "Mumbai");
-			String response = Utils_Http
-					.Request("http://api.openweathermap.org/data/2.5/weather?q="
-							+ name + "&appid=bd82977b86bf27fb59a04b61b657fb6f");
+			String response = Utils_Http.Request(HomeScreen.url + name
+					+ HomeScreen.api_key);
 			final ResBean iResBin = CoreGsonUtils.fromJson(response,
 					ResBean.class);
-
 			RemoteViews remoteViews = new RemoteViews(getApplicationContext()
 					.getPackageName(), R.layout.widget_layout);
+			if (iResBin != null) {
 
-			remoteViews.setTextViewText(R.id.update,
-					"Location:- " + iResBin.getName() + "\n" + "Temp:- "
-							+ iResBin.getMain().getTemp() + "\n" + "Status:- "
-							+ iResBin.getWeather().get(0).getDescription());
-
+				remoteViews.setTextViewText(R.id.update, "Location:- "
+						+ iResBin.getName() + "\n" + "Temp:- "
+						+ iResBin.getMain().getTemp() + "\n" + "Status:- "
+						+ iResBin.getWeather().get(0).getDescription());
+			}
 			// /
 			String for_response = Utils_Http
 					.Request("http://api.openweathermap.org/data/2.5/forecast?q="
 							+ name
-							+ "&mode=json&appid=bd82977b86bf27fb59a04b61b657fb6f");
+							+ "&mode=json&appid=cbec883d7afa3c2c00dd6d5abc2daa05");
 			final Forcast f_res = CoreGsonUtils.fromJson(for_response,
 					Forcast.class);
-			String text = "";
-			if (f_res != null && f_res.getCod() == 200
-					&& f_res.getList().size() > 0) {
-				for (int i = 0; i < 4 && i < f_res.getList().size(); i++) {
-					text += "Weather Forcaste:- "
-							+ (i + 1)
-							+ "\n"
-							+ "Temp:- "
-							+ f_res.getList().get(i).getMain().getTemp()
-							+ "\n"
-							+ "Status:- "
-							+ f_res.getList().get(i).getWeather().get(0)
-									.getDescription() + "\n";
-				}
+			if (f_res != null) {
 
+				String text = "";
+				if (f_res != null && f_res.getCod() == 200
+						&& f_res.getList().size() > 0) {
+					for (int i = 0; i < 4 && i < f_res.getList().size(); i++) {
+						text += "Weather Forcaste:- "
+								+ (i + 1)
+								+ "\n"
+								+ "Temp:- "
+								+ f_res.getList().get(i).getMain().getTemp()
+								+ "\n"
+								+ "Status:- "
+								+ f_res.getList().get(i).getWeather().get(0)
+										.getDescription() + "\n";
+					}
+
+				}
+				remoteViews.setTextViewText(R.id.forcaste, text);
 			}
-			remoteViews.setTextViewText(R.id.forcaste, text);
 			Intent clickIntent = new Intent(getApplicationContext(),
 					WidgetProvider.class);
 

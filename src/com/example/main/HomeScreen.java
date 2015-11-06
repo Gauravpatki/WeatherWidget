@@ -1,12 +1,16 @@
 package com.example.main;
 
+import org.apache.http.protocol.HTTP;
+
 import utils.Connection_Detector;
 import utils.CoreGsonUtils;
 import utils.Utils_Http;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -23,6 +27,8 @@ public class HomeScreen extends Activity {
 	TextView display_location;
 	EditText location;
 	ProgressBar pbar;
+	public static String url = "http://api.openweathermap.org/data/2.5/weather?q=";
+	public static String api_key = "&appid=cbec883d7afa3c2c00dd6d5abc2daa05";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +44,20 @@ public class HomeScreen extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				pbar.setVisibility(View.VISIBLE);
+				// pbar.setVisibility(View.VISIBLE);
 				GetData();
+
 			}
 		});
+	}
+
+	boolean isPalindrome(String str) {
+		int n = str.length();
+
+		for (int i = 0; i < n / 2; i++)
+			if (str.charAt(i) != str.charAt(n - i - 1))
+				return false;
+		return true;
 	}
 
 	public void GetData() {
@@ -70,18 +86,14 @@ public class HomeScreen extends Activity {
 		public void run() {
 			super.run();
 
-			String response = Utils_Http
-					.Request("http://api.openweathermap.org/data/2.5/weather?q="
-							+ name + "&appid=bd82977b86bf27fb59a04b61b657fb6f");
+			String response = Utils_Http.Request(url + name + api_key);
 			final ResBean iResBin = CoreGsonUtils.fromJson(response,
 					ResBean.class);
 			String for_response = Utils_Http
 					.Request("http://api.openweathermap.org/data/2.5/forecast?q="
-							+ name
-							+ "&mode=json&appid=bd82977b86bf27fb59a04b61b657fb6f");
+							+ name + "&mode=json&" + api_key);
 			final Forcast f_res = CoreGsonUtils.fromJson(for_response,
 					Forcast.class);
-			
 
 			runOnUiThread(new Runnable() {
 
